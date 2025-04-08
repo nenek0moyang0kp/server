@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@react-spring/web": "^9.7.5",
+    "firebase": "^11.6.0",
+    "framer-motion": "^12.5.0"
+  },
+  "devDependencies": {
+    "vite": "^6.2.5"
+  }
+}

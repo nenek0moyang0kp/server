@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Pragati+Narrow:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&family=Sora:wght@100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=League+Spartan:wght@100..900&family=Sora:wght@100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=League+Spartan:wght@100..900&family=Potta+One&family=Sora:wght@100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=League+Spartan:wght@100..900&family=Potta+One&family=Raleway:ital,wght@0,100..900;1,100..900&family=Sora:wght@100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Henny+Penny&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.hamburger-line {
+    @apply w-[30px] h-[2px] my-2 block bg-white transition-all duration-300 ease-in-out;
+  }
+  
+  .hamburger-active span:nth-child(1) {
+    @apply rotate-45 translate-y-2;
+  }
+  
+  .hamburger-active span:nth-child(2) {
+    @apply opacity-0;
+  }
+  
+  .hamburger-active span:nth-child(3) {
+    @apply -rotate-45 -translate-y-3;
+  }
+  
