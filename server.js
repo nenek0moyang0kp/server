@@ -5,6 +5,11 @@ import bodyParser from 'body-parser';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import cors from 'cors';
+
+app.use(cors({
+  origin: 'https://unrivaled-manatee-d0d387.netlify.app'
+}));
 
 dotenv.config();
 
