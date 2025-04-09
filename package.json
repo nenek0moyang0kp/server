@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "@octokit/rest": "^21.1.1",
     "@react-spring/web": "^9.7.5",
     "axios": "^1.8.4",
     "cors": "^2.8.5",
