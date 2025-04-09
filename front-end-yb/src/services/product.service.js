@@ -44,7 +44,7 @@ export const saveProduct = async (product) => {
       products.push(product);
     }
 
-    await axios.post(`${API_URL}/products`, products);
+    await axios.post(`${API_URL}/upload`, formData);
   } catch (error) {
     console.error("❌ Failed to save product:", error.message);
   }
@@ -54,7 +54,7 @@ export const deleteProduct = async (id) => {
   try {
     const { data: products } = await axios.get(`${API_URL}/products`);
     const updated = products.filter((p) => p.id !== id);
-    await axios.post(`${API_URL}/products`, products);
+    await axios.post(`${API_URL}/upload`, formData);
   } catch (error) {
     console.error("❌ Failed to delete product:", error.message);
   }
