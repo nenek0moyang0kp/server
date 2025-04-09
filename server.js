@@ -66,6 +66,11 @@ app.get('/products', async (req, res) => {
       path: 'products.json',
     });
 
+    if (response.status !== 200) {
+      console.error("❌ Unexpected response from GitHub:", response.status, response.data);
+      return res.status(500).json({ error: 'Unexpected response from GitHub.' });
+    }
+
     const content = Buffer.from(response.data.content, 'base64').toString('utf-8').trim();
     console.log("📦 Content fetched:", content);
 
@@ -83,6 +88,7 @@ app.get('/products', async (req, res) => {
     res.status(500).json({ error: 'Gagal fetch data dari GitHub.' });
   }
 });
+
 
 
 // Endpoint untuk update produk ke GitHub
