@@ -7,14 +7,13 @@ import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
 
-app.use(cors({
-  origin: 'https://unrivaled-manatee-d0d387.netlify.app'
-}));
+
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+app.use(cors()); // <-- Tambahkan ini
 
 // Middleware
 app.use(bodyParser.json());
