@@ -12,6 +12,14 @@ const GalleryPage = () => {
     const getProducts = async () => {
       try {
         const data = await fetchProducts();
+        console.log("Fetched data:", data); // Tambahkan ini
+  
+        if (!Array.isArray(data)) {
+          console.error("Data bukan array, tapi:", data);
+          setProducts([]); // biar aman
+          return;
+        }
+  
         const formattedData = data.map((item) => ({
           ...item,
           height: 1,
@@ -23,8 +31,10 @@ const GalleryPage = () => {
         console.error("Failed to fetch products:", error);
       }
     };
+  
     getProducts();
   }, []);
+  
 
   useEffect(() => {
     document.body.style.overflow = selectedPost ? "hidden" : "auto";
