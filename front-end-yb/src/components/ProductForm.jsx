@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { uploadToImgur } from "../services/imgur.service";
-import { updateProductsFile } from "../services/github.service";
+import axios from "axios";
+import { saveProduct } from "../services/product.service";
 
 const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
   const [product, setProduct] = useState({
@@ -23,48 +23,41 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      try {
-        const imageUrl = await uploadToImgur(file);
-        setProduct((prev) => ({ ...prev, image: imageUrl }));
-        console.log("Gambar berhasil diupload ke:", imageUrl);
-      } catch (err) {
-        console.error("Gagal upload gambar:", err.message);
-        alert("Upload gambar gagal. Coba lagi!");
-      }
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await axios.post("http://localhost:3001/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const imageUrl = res.data.imageUrl;
+      setProduct((prev) => ({ ...prev, image: imageUrl }));
+      console.log("Gambar berhasil diupload:", imageUrl);
+    } catch (err) {
+      console.error("Upload gagal:", err.message);
+      alert("Upload gambar gagal.");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!product.title || !product.description || !product.image) {
       alert("Semua field wajib diisi!");
       return;
     }
 
-    const productToSave = {
-      ...product,
-      id: product.id || Date.now().toString(),
-    };
-
     try {
-      const productsRes = await fetch("https://raw.githubusercontent.com/calioralam/YBStudio/main/products.json");
-      const existingProducts = await productsRes.json();
-
-      const updatedProducts = product.id
-        ? existingProducts.map((p) => (p.id === product.id ? productToSave : p))
-        : [...existingProducts, productToSave];
-
-      await updateProductsFile(updatedProducts);
-      alert("Produk berhasil disimpan ke GitHub!");
-
-      onSave?.(productToSave);
+      await saveProduct(product);
+      alert("Produk berhasil disimpan!");
       setProduct({ title: "", description: "", image: "", id: null });
-
+      onSave?.(product);
     } catch (err) {
-      console.error("Gagal menyimpan ke GitHub:", err.message);
-      alert("Gagal menyimpan produk. Coba lagi!");
+      console.error("Gagal menyimpan produk:", err.message);
+      alert("Gagal menyimpan produk.");
     }
   };
 
@@ -74,7 +67,7 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
       className="max-w-xl mx-auto bg-zinc-900 p-6 rounded-xl shadow-lg text-white"
     >
       <h2 className="text-xl font-semibold mb-4">
-        {product.id ? "Edit Produk" : "Tambah"}
+        {product.id ? "Edit Produk" : "Tambah Produk"}
       </h2>
 
       <div className="mb-4">

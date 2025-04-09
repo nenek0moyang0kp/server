@@ -1,90 +1,96 @@
-const express = require('express');
-const fetch = require('node-fetch');
-const dotenv = require('dotenv');
-const cors = require('cors');
+import express from 'express';
+import axios from 'axios';
+import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
+
 const app = express();
 const PORT = 3001;
 
-app.use(cors());
-app.use(express.json());
+// Middleware
+app.use(bodyParser.json());
+app.use('/uploads', express.static('uploads')); // serve file statis
 
-const {
-  GITHUB_TOKEN,
-  GITHUB_USERNAME,
-  GITHUB_REPO,
-  FILE_PATH,
-  BRANCH,
-} = process.env;
+// Buat folder uploads kalau belum ada
+const uploadDir = './uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true }); // rekursif biar aman
+}
 
-const GITHUB_API = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+// Multer setup untuk upload file ke folder uploads/
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const filename = `${Date.now()}${ext}`;
+    cb(null, filename);
+  },
+});
 
+const upload = multer({ storage });
+
+// Upload image endpoint
+app.post('/upload', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  const imageUrl = `http://localhost:${PORT}/uploads/${req.file.filename}`;
+  res.json({ imageUrl });
+});
+
+// --- GitHub Setup ---
+const { GITHUB_TOKEN, GITHUB_REPO, GITHUB_FILE } = process.env;
+
+const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+
+const headers = {
+  Authorization: `token ${GITHUB_TOKEN}`,
+  Accept: 'application/vnd.github.v3+json',
+};
+
+// GET products
 app.get('/products', async (req, res) => {
   try {
-    const response = await fetch(`${GITHUB_API}?ref=${BRANCH}`, {
-      headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github.v3+json',
-      },
-    });
-
-    if (!response.ok) {
-      return res.status(response.status).json({ error: 'Gagal mengambil data produk.' });
-    }
-
-    const data = await response.json();
-    const content = Buffer.from(data.content, 'base64').toString();
+    const response = await axios.get(apiUrl, { headers });
+    const content = Buffer.from(response.data.content, 'base64').toString();
     res.json(JSON.parse(content));
   } catch (err) {
-    res.status(500).json({ error: 'Server error', detail: err.message });
+    res.status(500).json({ error: 'Failed to fetch products from GitHub.' });
   }
 });
 
-app.put('/products', async (req, res) => {
-  const products = req.body;
-
+// POST products (replace all)
+app.post('/products', async (req, res) => {
   try {
-    // Get SHA of existing file
-    const getRes = await fetch(`${GITHUB_API}?ref=${BRANCH}`, {
-      headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github.v3+json',
-      },
-    });
+    const getRes = await axios.get(apiUrl, { headers });
+    const sha = getRes.data.sha;
 
-    const getData = await getRes.json();
-    const sha = getData.sha;
+    const updatedData = req.body;
+    const encodedContent = Buffer.from(JSON.stringify(updatedData, null, 2)).toString('base64');
 
-    // Update file
-    const updateRes = await fetch(GITHUB_API, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: 'Update products.json',
-        content: Buffer.from(JSON.stringify(products, null, 2)).toString('base64'),
-        branch: BRANCH,
-        sha, // dari getData.sha
-      }),
-    });
-    
+    await axios.put(apiUrl, {
+      message: 'update product',
+      content: encodedContent,
+      sha,
+    }, { headers });
 
-    const updateData = await updateRes.json();
-
-    if (!updateRes.ok) {
-      return res.status(updateRes.status).json({ error: 'Gagal update produk.', detail: updateData });
-    }
-
-    res.json({ message: 'Produk berhasil diperbarui.', data: updateData });
+    res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: 'Server error', detail: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update products on GitHub.' });
   }
+});
+
+app.get('/', (req, res) => {
+  res.send('Server berjalan 👍');
 });
 
 app.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });

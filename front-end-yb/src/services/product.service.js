@@ -1,24 +1,35 @@
-export const fetchProducts = () => {
-  const products = JSON.parse(localStorage.getItem("products") || "[]");
-  return Promise.resolve(products);
+import axios from 'axios';
+
+const API_URL = 'http://localhost:3001/products';
+
+export const fetchProducts = async () => {
+  const res = await axios.get(API_URL);
+  return res.data;
 };
 
-export const saveProduct = (product) => {
-  const products = JSON.parse(localStorage.getItem("products") || []);
-  if (product.id) {
-    const index = products.findIndex((p) => p.id === product.id);
+export const saveProduct = async (product) => {
+  // Jika tidak ada ID, tambahkan ID baru
+  if (!product.id) {
+    product.id = Date.now().toString();
+  }
+
+  // Ambil data lama dari server
+  const { data: products } = await axios.get(API_URL);
+
+  // Cek apakah produk sudah ada (edit atau tambah baru)
+  const index = products.findIndex((p) => p.id === product.id);
+  if (index >= 0) {
     products[index] = product;
   } else {
-    product.id = Date.now().toString();
     products.push(product);
   }
-  localStorage.setItem("products", JSON.stringify(products));
-  return Promise.resolve();
+
+  // Kirim data baru ke server (replace all)
+  await axios.post(API_URL, products); // Server menerima seluruh array
 };
 
-export const deleteProduct = (id) => {
-  const products = JSON.parse(localStorage.getItem("products") || []);
+export const deleteProduct = async (id) => {
+  const { data: products } = await axios.get(API_URL);
   const updated = products.filter((p) => p.id !== id);
-  localStorage.setItem("products", JSON.stringify(updated));
-  return Promise.resolve();
+  await axios.post(API_URL, updated); // Kirim seluruh array yang baru
 };
