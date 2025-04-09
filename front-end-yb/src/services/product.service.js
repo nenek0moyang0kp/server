@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Ganti ke URL Railway jika sudah online
-const API_URL = 'https://ybstudio-production.up.railway.app/products';
+const API_URL = 'https://ybstudio-production.up.railway.app';
 
 export const fetchProducts = async () => {
   try {
