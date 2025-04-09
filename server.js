@@ -6,34 +6,24 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
-import { Octokit } from "octokit";
-
-
-import { Octokit } from '@octokit/rest';
+import { Octokit } from '@octokit/rest'; // ✅ tambahkan ini
 
 dotenv.config();
-const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
-});
-
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-app.use(cors({
-  origin: 'https://unrivaled-manatee-d0d387.netlify.app',
-}));
 
-// Middleware
+app.use(cors());
 app.use(bodyParser.json());
-app.use('/uploads', express.static('uploads')); // serve file statis
+app.use('/uploads', express.static('uploads'));
 
 // Buat folder uploads kalau belum ada
 const uploadDir = './uploads';
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true }); // rekursif biar aman
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer setup untuk upload file ke folder uploads/
+// Multer setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -44,10 +34,16 @@ const storage = multer.diskStorage({
     cb(null, filename);
   },
 });
-
 const upload = multer({ storage });
 
-// Upload image endpoint
+// Inisialisasi Octokit
+const octokit = new Octokit({
+  auth: process.env.GITHUB_TOKEN,
+});
+
+const { GITHUB_REPO, GITHUB_FILE } = process.env;
+
+// Upload endpoint
 app.post('/upload', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
@@ -56,16 +52,6 @@ app.post('/upload', upload.single('image'), (req, res) => {
   const imageUrl = `https://ybstudio-production.up.railway.app/uploads/${req.file.filename}`;
   res.json({ imageUrl });
 });
-
-// --- GitHub Setup ---
-const { GITHUB_TOKEN, GITHUB_REPO, GITHUB_FILE } = process.env;
-
-const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-
-const headers = {
-  Authorization: `token ${GITHUB_TOKEN}`,
-  Accept: 'application/vnd.github.v3+json',
-};
 
 // GET products
 app.get('/products', async (req, res) => {
@@ -81,30 +67,44 @@ app.get('/products', async (req, res) => {
     res.json(json);
   } catch (error) {
     console.error("🔥 Gagal fetch data dari GitHub:", error.message);
-    res.status(500).json({ error: 'Gagal fetch data' });
+    res.status(500).json({ error: 'Gagal fetch data dari GitHub.' });
   }
 });
 
-
-
-// POST products (replace all)
+// POST products (overwrite)
 app.post('/products', async (req, res) => {
   try {
-    const getRes = await axios.get(apiUrl, { headers });
-    const sha = getRes.data.sha;
+    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
 
+    const getRes = await axios.get(apiUrl, {
+      headers: {
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+
+    const sha = getRes.data.sha;
     const updatedData = req.body;
     const encodedContent = Buffer.from(JSON.stringify(updatedData, null, 2)).toString('base64');
 
-    await axios.put(apiUrl, {
-      message: 'update product',
-      content: encodedContent,
-      sha,
-    }, { headers });
+    await axios.put(
+      apiUrl,
+      {
+        message: 'update product',
+        content: encodedContent,
+        sha,
+      },
+      {
+        headers: {
+          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      }
+    );
 
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error('🔥 Gagal update ke GitHub:', err.message);
     res.status(500).json({ error: 'Failed to update products on GitHub.' });
   }
 });
