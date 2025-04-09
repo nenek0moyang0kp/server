@@ -10,7 +10,7 @@ import { Octokit } from '@octokit/rest';
 
 dotenv.config();
 
-
+// Inisialisasi Octokit sekali aja
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
@@ -28,7 +28,7 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer setup
+// Setup multer untuk upload gambar
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -41,14 +41,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Inisialisasi Octokit
-const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
-});
-
-const { GITHUB_REPO, GITHUB_FILE } = process.env;
-
-// Upload endpoint
+// Endpoint untuk upload gambar
 app.post('/upload', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
@@ -58,7 +51,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
   res.json({ imageUrl });
 });
 
-// GET products
+// Endpoint untuk GET produk dari GitHub
 app.get('/products', async (req, res) => {
   try {
     const response = await octokit.repos.getContent({
@@ -76,14 +69,15 @@ app.get('/products', async (req, res) => {
   }
 });
 
-// POST products (overwrite)
+// Endpoint untuk update produk ke GitHub
 app.post('/products', async (req, res) => {
   try {
+    const { GITHUB_REPO, GITHUB_FILE, GITHUB_TOKEN } = process.env;
     const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
 
     const getRes = await axios.get(apiUrl, {
       headers: {
-        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+        Authorization: `token ${GITHUB_TOKEN}`,
         Accept: 'application/vnd.github.v3+json',
       },
     });
@@ -101,7 +95,7 @@ app.post('/products', async (req, res) => {
       },
       {
         headers: {
-          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+          Authorization: `token ${GITHUB_TOKEN}`,
           Accept: 'application/vnd.github.v3+json',
         },
       }
@@ -114,10 +108,12 @@ app.post('/products', async (req, res) => {
   }
 });
 
+// Tes endpoint
 app.get('/', (req, res) => {
   res.send('Server berjalan 👍');
 });
 
+// Jalankan server
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
