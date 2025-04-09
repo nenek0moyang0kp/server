@@ -51,6 +51,12 @@ app.post('/upload', upload.single('image'), (req, res) => {
   res.json({ imageUrl });
 });
 
+
+console.log("🔐 GITHUB_TOKEN:", process.env.GITHUB_TOKEN ? '✅ Detected' : '❌ Missing');
+console.log("📁 GITHUB_REPO:", process.env.GITHUB_REPO);
+console.log("📄 GITHUB_FILE:", process.env.GITHUB_FILE);
+
+
 // Endpoint untuk GET produk dari GitHub
 app.get('/products', async (req, res) => {
   try {
@@ -61,13 +67,13 @@ app.get('/products', async (req, res) => {
     });
 
     const content = Buffer.from(response.data.content, 'base64').toString('utf-8').trim();
+    console.log("📦 Content fetched:", content);
 
     let json;
     try {
       json = JSON.parse(content);
     } catch (err) {
       console.error("❌ JSON parse error:", err);
-      console.log("📦 Content fetched from GitHub:", content);
       return res.status(500).json({ error: 'Invalid JSON in products.json' });
     }
 
@@ -77,6 +83,7 @@ app.get('/products', async (req, res) => {
     res.status(500).json({ error: 'Gagal fetch data dari GitHub.' });
   }
 });
+
 
 // Endpoint untuk update produk ke GitHub
 app.post('/products', async (req, res) => {
@@ -116,6 +123,10 @@ app.post('/products', async (req, res) => {
     res.status(500).json({ error: 'Failed to update products on GitHub.' });
   }
 });
+if (response.status !== 200) {
+  console.error("❌ Unexpected response from GitHub:", response.status, response.data);
+  return res.status(500).json({ error: 'Unexpected response from GitHub.' });
+}
 
 // Tes endpoint
 app.get('/', (req, res) => {
