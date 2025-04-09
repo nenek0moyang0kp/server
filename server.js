@@ -60,11 +60,20 @@ app.get('/products', async (req, res) => {
       path: 'products.json',
     });
 
-    const content = Buffer.from(response.data.content, 'base64').toString();
-    const json = JSON.parse(content);
+    const content = Buffer.from(response.data.content, 'base64').toString('utf-8').trim();
+
+    let json;
+    try {
+      json = JSON.parse(content);
+    } catch (err) {
+      console.error("❌ JSON parse error:", err);
+      console.log("📦 Content fetched from GitHub:", content);
+      return res.status(500).json({ error: 'Invalid JSON in products.json' });
+    }
+
     res.json(json);
   } catch (error) {
-    console.error("🔥 Gagal fetch data dari GitHub:", error.message);
+    console.error("🔥 Gagal fetch data dari GitHub:", error);
     res.status(500).json({ error: 'Gagal fetch data dari GitHub.' });
   }
 });
