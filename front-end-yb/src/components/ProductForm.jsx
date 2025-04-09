@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { saveProduct } from "../services/product.service";
+import { uploadImageToImgur } from "../services/imgur.service"; // tambahkan ini di atas
+
 
 const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
   const [product, setProduct] = useState({
@@ -24,25 +26,17 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const formData = new FormData();
-    formData.append("image", file);
-
+  
     try {
-      const res = await axios.post("https://ybstudio-production.up.railway.app/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      const imageUrl = res.data.imageUrl;
+      const imageUrl = await uploadImageToImgur(file);
       setProduct((prev) => ({ ...prev, image: imageUrl }));
-      console.log("Gambar berhasil diupload:", imageUrl);
+      console.log("Gambar berhasil diupload ke Imgur:", imageUrl);
     } catch (err) {
-      console.error("Upload gagal:", err.message);
-      alert("Upload gambar gagal.");
+      console.error("Upload ke Imgur gagal:", err.message);
+      alert("Upload gambar ke Imgur gagal.");
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!product.title || !product.description || !product.image) {
