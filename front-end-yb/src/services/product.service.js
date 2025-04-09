@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = 'https://ybstudio-production.up.railway.app';
 
 export const fetchProducts = async () => {
-  const res = await axios.get("https://ybstudio-production.up.railway.app/");
+  const res = await axios.get("https://ybstudio-production.up.railway.app");
   if (!Array.isArray(res.data)) {
     console.error("Expected array, got:", res.data);
     return [];
@@ -27,11 +27,11 @@ export const saveProduct = async (product) => {
     products.push(product);
   }
 
-  await axios.post(API_URL, products);
+  await axios.post(`${API_URL}/products`, products); 
 };
 
 export const deleteProduct = async (id) => {
   const { data: products } = await axios.get(`${API_URL}/products`);
   const updated = products.filter((p) => p.id !== id);
-  await axios.post(`${API_URL}/products`, updated);
+  await axios.post(`${API_URL}/products`, updated); 
 };
