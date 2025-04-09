@@ -10,25 +10,26 @@ import { Octokit } from '@octokit/rest';
 
 dotenv.config();
 
-// Inisialisasi Octokit sekali aja
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Inisialisasi Octokit
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
-const app = express();
-const PORT = process.env.PORT || 3001;
-
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/uploads', express.static('uploads'));
 
-// Buat folder uploads kalau belum ada
+// Buat folder uploads jika belum ada
 const uploadDir = './uploads';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Setup multer untuk upload gambar
+// Setup multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -41,7 +42,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Endpoint untuk upload gambar
+// =================== ENDPOINTS =================== //
+
+// Upload gambar
 app.post('/upload', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
@@ -51,13 +54,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
   res.json({ imageUrl });
 });
 
-
-console.log("🔐 GITHUB_TOKEN:", process.env.GITHUB_TOKEN ? '✅ Detected' : '❌ Missing');
-console.log("📁 GITHUB_REPO:", process.env.GITHUB_REPO);
-console.log("📄 GITHUB_FILE:", process.env.GITHUB_FILE);
-
-
-// Endpoint untuk GET produk dari GitHub
+// GET products from GitHub
 app.get('/products', async (req, res) => {
   try {
     const response = await octokit.repos.getContent({
@@ -72,7 +69,6 @@ app.get('/products', async (req, res) => {
     }
 
     const content = Buffer.from(response.data.content, 'base64').toString('utf-8').trim();
-    console.log("📦 Content fetched:", content);
 
     let json;
     try {
@@ -89,9 +85,7 @@ app.get('/products', async (req, res) => {
   }
 });
 
-
-
-// Endpoint untuk update produk ke GitHub
+// POST products (update to GitHub)
 app.post('/products', async (req, res) => {
   try {
     const { GITHUB_REPO, GITHUB_FILE, GITHUB_TOKEN } = process.env;
@@ -129,17 +123,18 @@ app.post('/products', async (req, res) => {
     res.status(500).json({ error: 'Failed to update products on GitHub.' });
   }
 });
-if (response.status !== 200) {
-  console.error("❌ Unexpected response from GitHub:", response.status, response.data);
-  return res.status(500).json({ error: 'Unexpected response from GitHub.' });
-}
 
 // Tes endpoint
 app.get('/', (req, res) => {
   res.send('Server berjalan 👍');
 });
 
-// Jalankan server
+// Debug info saat server start
+console.log("🔐 GITHUB_TOKEN:", process.env.GITHUB_TOKEN ? '✅ Detected' : '❌ Missing');
+console.log("📁 GITHUB_REPO:", process.env.GITHUB_REPO);
+console.log("📄 GITHUB_FILE:", process.env.GITHUB_FILE);
+
+// Start server
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
