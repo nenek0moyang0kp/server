@@ -6,9 +6,15 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
-import { Octokit } from '@octokit/rest'; // ✅ tambahkan ini
+import { Octokit } from '@octokit/rest';
 
 dotenv.config();
+
+import { Octokit } from "@octokit/rest";
+
+const octokit = new Octokit({
+  auth: process.env.GITHUB_TOKEN,
+});
 
 const app = express();
 const PORT = process.env.PORT || 3001;
