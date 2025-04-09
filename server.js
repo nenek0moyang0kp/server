@@ -45,7 +45,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+  const imageUrl = `https://ybstudio-production.up.railway.app/uploads/${req.file.filename}`;
   res.json({ imageUrl });
 });
 
@@ -62,13 +62,20 @@ const headers = {
 // GET products
 app.get('/products', async (req, res) => {
   try {
-    const response = await axios.get(apiUrl, { headers });
-    const content = Buffer.from(response.data.content, 'base64').toString();
-    res.json(JSON.parse(content));
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch products from GitHub.' });
+    // kemungkinan error di sini:
+    const response = await octokit.repos.getContent({
+      owner: 'calioralam',
+      repo: 'YBStudio',
+      path: 'products.json',
+    });
+
+    // ...
+  } catch (error) {
+    console.error("🔥 Gagal fetch data dari GitHub:", error.message);
+    res.status(500).json({ error: 'Gagal fetch data' });
   }
 });
+
 
 // POST products (replace all)
 app.post('/products', async (req, res) => {
