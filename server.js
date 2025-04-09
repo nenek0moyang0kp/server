@@ -89,8 +89,14 @@ app.get('/products', async (req, res) => {
 app.post('/products', async (req, res) => {
   try {
     const { GITHUB_REPO, GITHUB_FILE, GITHUB_TOKEN } = process.env;
+
+    if (!GITHUB_REPO || !GITHUB_FILE || !GITHUB_TOKEN) {
+      return res.status(500).json({ error: 'Missing environment variables.' });
+    }
+
     const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
 
+    // Ambil sha dulu
     const getRes = await axios.get(apiUrl, {
       headers: {
         Authorization: `token ${GITHUB_TOKEN}`,
@@ -100,12 +106,19 @@ app.post('/products', async (req, res) => {
 
     const sha = getRes.data.sha;
     const updatedData = req.body;
-    const encodedContent = Buffer.from(JSON.stringify(updatedData, null, 2)).toString('base64');
 
-    await axios.put(
+    // Validasi updatedData harus array (produk)
+    if (!Array.isArray(updatedData)) {
+      return res.status(400).json({ error: 'Payload harus berupa array of products.' });
+    }
+
+    const jsonString = JSON.stringify(updatedData, null, 2);
+    const encodedContent = Buffer.from(jsonString).toString('base64');
+
+    const putRes = await axios.put(
       apiUrl,
       {
-        message: 'update product',
+        message: 'Update product list',
         content: encodedContent,
         sha,
       },
@@ -117,10 +130,13 @@ app.post('/products', async (req, res) => {
       }
     );
 
-    res.json({ success: true });
+    res.json({ success: true, commit: putRes.data.commit.sha });
   } catch (err) {
-    console.error('🔥 Gagal update ke GitHub:', err.message);
-    res.status(500).json({ error: 'Failed to update products on GitHub.' });
+    console.error('🔥 Gagal update ke GitHub:', err.response?.data || err.message);
+    res.status(500).json({
+      error: 'Failed to update products on GitHub.',
+      detail: err.response?.data || err.message,
+    });
   }
 });
 
