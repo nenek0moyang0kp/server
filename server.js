@@ -68,9 +68,10 @@ app.put('/products', async (req, res) => {
         message: 'Update products.json',
         content: Buffer.from(JSON.stringify(products, null, 2)).toString('base64'),
         branch: BRANCH,
-        sha,
+        sha, // dari getData.sha
       }),
     });
+    
 
     const updateData = await updateRes.json();
 
