@@ -1,11 +1,18 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3001/products';
+axios.get(`${API_URL}/products`);
+axios.post(`${API_URL}/upload`, formData, config);
 
 export const fetchProducts = async () => {
-  const res = await axios.get(API_URL);
-  return res.data;
+  try {
+    const response = await axios.get(`${API_URL}/products`);
+    return response.data;
+  } catch (error) {
+    throw new Error("Gagal mengambil data produk.");
+  }
 };
+
 
 export const saveProduct = async (product) => {
   // Jika tidak ada ID, tambahkan ID baru
