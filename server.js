@@ -9,15 +9,19 @@ import cors from 'cors';
 import { Octokit } from "octokit";
 
 
+import { Octokit } from '@octokit/rest';
 
 dotenv.config();
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
+
 const app = express();
 const PORT = process.env.PORT || 3001;
-app.use(cors()); // <-- Tambahkan ini
+app.use(cors({
+  origin: 'https://unrivaled-manatee-d0d387.netlify.app',
+}));
 
 // Middleware
 app.use(bodyParser.json());
@@ -66,17 +70,15 @@ const headers = {
 // GET products
 app.get('/products', async (req, res) => {
   try {
-    const result = await octokit.repos.getContent({
-      owner,
-      repo,
-      path: filePath,
-      ref: process.env.GITHUB_BRANCH || 'main',
+    const response = await octokit.repos.getContent({
+      owner: 'calioralam',
+      repo: 'YBStudio',
+      path: 'products.json',
     });
 
-    const content = Buffer.from(result.data.content, 'base64').toString('utf-8');
-    const products = JSON.parse(content);
-
-    res.json(products);
+    const content = Buffer.from(response.data.content, 'base64').toString();
+    const json = JSON.parse(content);
+    res.json(json);
   } catch (error) {
     console.error("🔥 Gagal fetch data dari GitHub:", error.message);
     res.status(500).json({ error: 'Gagal fetch data' });
