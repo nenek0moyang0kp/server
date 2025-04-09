@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/products';
+const API_URL = 'https://ybstudio-production.up.railway.app/';
 axios.get(`${API_URL}/products`);
 axios.post(`${API_URL}/upload`, formData, config);
 
