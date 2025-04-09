@@ -6,10 +6,14 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
+import { Octokit } from "octokit";
 
 
 
 dotenv.config();
+const octokit = new Octokit({
+  auth: process.env.GITHUB_TOKEN,
+});
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -62,19 +66,23 @@ const headers = {
 // GET products
 app.get('/products', async (req, res) => {
   try {
-    // kemungkinan error di sini:
-    const response = await octokit.repos.getContent({
-      owner: 'calioralam',
-      repo: 'YBStudio',
-      path: 'products.json',
+    const result = await octokit.repos.getContent({
+      owner,
+      repo,
+      path: filePath,
+      ref: process.env.GITHUB_BRANCH || 'main',
     });
 
-    // ...
+    const content = Buffer.from(result.data.content, 'base64').toString('utf-8');
+    const products = JSON.parse(content);
+
+    res.json(products);
   } catch (error) {
     console.error("🔥 Gagal fetch data dari GitHub:", error.message);
     res.status(500).json({ error: 'Gagal fetch data' });
   }
 });
+
 
 
 // POST products (replace all)
