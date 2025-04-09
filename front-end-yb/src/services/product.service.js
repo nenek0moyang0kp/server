@@ -21,13 +21,15 @@ export const uploadImage = async (file) => {
   formData.append('image', file);
 
   try {
-    const res = await axios.post(`${API_URL}/upload`, formData);
+    const res = await axios.post(`${API_URL}/upload`, formData); // ⬅️ ini dia!
     return res.data.imageUrl;
   } catch (error) {
     console.error("❌ Upload gagal:", error.message);
     throw error;
   }
 };
+
+
 
 export const saveProduct = async (product) => {
   try {
@@ -44,7 +46,7 @@ export const saveProduct = async (product) => {
       products.push(product);
     }
 
-    await axios.post(`${API_URL}/upload`, formData);
+    await axios.post(`${API_URL}/products`, products);
   } catch (error) {
     console.error("❌ Failed to save product:", error.message);
   }
@@ -54,7 +56,7 @@ export const deleteProduct = async (id) => {
   try {
     const { data: products } = await axios.get(`${API_URL}/products`);
     const updated = products.filter((p) => p.id !== id);
-    await axios.post(`${API_URL}/upload`, formData);
+    await axios.post(`${API_URL}/products`, updated); // <-- ini yang penting
   } catch (error) {
     console.error("❌ Failed to delete product:", error.message);
   }

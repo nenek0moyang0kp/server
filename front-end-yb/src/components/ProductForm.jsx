@@ -29,7 +29,7 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
     formData.append("image", file);
 
     try {
-      const res = await axios.post("https://ybstudio-production.up.railway.app/", formData, {
+      const res = await axios.post("https://ybstudio-production.up.railway.app/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
