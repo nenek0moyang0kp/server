@@ -74,8 +74,13 @@ app.get('/products', async (req, res) => {
     try {
       json = JSON.parse(content);
     } catch (err) {
-      console.error("❌ JSON parse error:", err);
-      return res.status(500).json({ error: 'Invalid JSON in products.json' });
+      console.error('🔥 Gagal update ke GitHub:', err.response?.data || err.message);
+    
+      res.status(500).json({
+        error: 'Failed to update products on GitHub.',
+        detail: err.response?.data || err.message,
+      });
+    
     }
 
     res.json(json);
@@ -133,6 +138,12 @@ app.post('/products', async (req, res) => {
     res.json({ success: true, commit: putRes.data.commit.sha });
   } catch (err) {
     console.error('🔥 Gagal update ke GitHub:', err.response?.data || err.message);
+  
+    res.status(500).json({
+      error: 'Failed to update products on GitHub.',
+      detail: err.response?.data || err.message,
+    });
+  
     res.status(500).json({
       error: 'Failed to update products on GitHub.',
       detail: err.response?.data || err.message,
