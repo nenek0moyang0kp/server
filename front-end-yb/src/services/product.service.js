@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = 'https://ybstudio-production.up.railway.app';
 
 export const fetchProducts = async () => {
-  const res = await axios.get("https://ybstudio-production.up.railway.app/products");
+  const res = await axios.get("https://ybstudio-production.up.railway.app/");
   if (!Array.isArray(res.data)) {
     console.error("Expected array, got:", res.data);
     return [];
