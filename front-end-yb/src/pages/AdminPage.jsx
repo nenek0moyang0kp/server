@@ -24,7 +24,7 @@ const AdminPage = () => {
   };
 
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm("Yakin ingin menghapus produk ini?");
+    const confirmDelete = window.confirm("Yakin ingin menghapus data ini?");
     if (!confirmDelete) return;
 
     deleteProduct(id).then(loadProducts);
@@ -96,7 +96,7 @@ const AdminPage = () => {
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.length === 0 ? (
           <p className="text-center col-span-full text-gray-400">
-            Belum ada produk ditambahkan.
+            Belum ada data ditambahkan.
           </p>
         ) : (
           products.map((product) => (

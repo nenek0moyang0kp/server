@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { saveProduct } from "../services/product.service";
-import { uploadImageToImgur } from "../services/imgur.service"; // tambahkan ini di atas
-
+import { uploadImageToImgur } from "../services/imgur.service";
 
 const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
   const [product, setProduct] = useState({
@@ -26,7 +24,7 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-  
+
     try {
       const imageUrl = await uploadImageToImgur(file);
       setProduct((prev) => ({ ...prev, image: imageUrl }));
@@ -36,7 +34,7 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
       alert("Upload gambar ke Imgur gagal.");
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!product.title || !product.description || !product.image) {
@@ -46,12 +44,12 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
 
     try {
       await saveProduct(product);
-      alert("Produk berhasil disimpan!");
+      alert("Data berhasil disimpan!");
       setProduct({ title: "", description: "", image: "", id: null });
       onSave?.(product);
     } catch (err) {
-      console.error("Gagal menyimpan produk:", err.message);
-      alert("Gagal menyimpan produk.");
+      console.error("Gagal menyimpan data:", err.message);
+      alert("Gagal menyimpan data.");
     }
   };
 
@@ -61,7 +59,7 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
       className="max-w-xl mx-auto bg-zinc-900 p-6 rounded-xl shadow-lg text-white"
     >
       <h2 className="text-xl font-semibold mb-4">
-        {product.id ? "Edit Produk" : "Tambah Produk"}
+        {product.id ? "Edit data" : "Tambah data"}
       </h2>
 
       <div className="mb-4">
@@ -94,7 +92,7 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
           type="file"
           accept="image/*"
           onChange={handleImageUpload}
-          className="text-sm file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-pink-600 file:text-white hover:file:bg-pink-700"
+          className="text-sm file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700"
         />
         {product.image && (
           <img
@@ -108,9 +106,9 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
       <div className="flex gap-2">
         <button
           type="submit"
-          className="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-4 rounded-lg font-semibold"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg font-semibold"
         >
-          {product.id ? "Update Produk" : "Simpan Produk"}
+          {product.id ? "Update data" : "Simpan data"}
         </button>
         {product.id && (
           <button
