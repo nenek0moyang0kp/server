@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://server-production-0992.up.railway.app/';
+const API_URL = 'https://server-production-0992.up.railway.app';
 
 export const fetchProducts = async () => {
   try {
