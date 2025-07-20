@@ -56,60 +56,65 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-xl mx-auto bg-zinc-900 p-6 rounded-xl shadow-lg text-white"
+      className="max-w-xl mx-auto bg-zinc-900 p-6 rounded-2xl shadow-xl text-white font-spartan"
     >
-      <h2 className="text-xl font-semibold mb-4">
-        {product.id ? "Edit data" : "Tambah data"}
+      <h2 className="text-xl md:text-2xl font-bold mb-6 text-white">
+        {product.id ? "Edit Data" : "Tambah Data"}
       </h2>
 
       <div className="mb-4">
-        <label className="block text-sm mb-1">Judul</label>
+        <label className="block text-sm mb-1 text-gray-300">Judul</label>
         <input
           name="title"
           type="text"
           value={product.title}
           onChange={handleChange}
-          className="w-full px-3 py-2 bg-zinc-800 text-white rounded-lg"
+          className="w-full px-4 py-2 bg-black border border-gray-700 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#639f4e]"
           required
         />
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm mb-1">Deskripsi</label>
+        <label className="block text-sm mb-1 text-gray-300">Deskripsi</label>
         <textarea
           name="description"
           value={product.description}
           onChange={handleChange}
-          className="w-full px-3 py-2 bg-zinc-800 text-white rounded-lg"
+          className="w-full px-4 py-2 bg-black border border-gray-700 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#639f4e]"
           rows={4}
           required
         />
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm mb-1">Upload Gambar</label>
+        <label className="block text-sm mb-2 text-gray-300">Pilih Gambar</label>
         <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="text-sm file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700"
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="w-full p-2 rounded-xl bg-transparent text-white border border-[#639f4e]
+        file:mr-4 file:py-2 file:px-4 file:rounded-full
+        file:border-0 file:bg-gray-300 file:text-black
+        file:text-sm file:font-semibold hover:file:bg-gray-400 transition"
         />
+
         {product.image && (
           <img
             src={product.image}
             alt="Preview"
-            className="mt-4 max-h-64 object-contain rounded"
+            className="mt-4 max-h-64 object-contain rounded-xl border border-gray-700"
           />
         )}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col md:flex-row gap-4 mt-6">
         <button
           type="submit"
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg font-semibold"
+          className="w-full bg-transparent border border-[#639f4e] text-white py-2 px-4 rounded-xl font-semibold hover:bg-[#639f4e]/10 transition"
         >
-          {product.id ? "Update data" : "Simpan data"}
+          {product.id ? "Update Data" : "SUBMIT"}
         </button>
+
         {product.id && (
           <button
             type="button"
@@ -117,7 +122,7 @@ const ProductForm = ({ onSave, editingProduct, onCancelEdit }) => {
               setProduct({ title: "", description: "", image: "", id: null });
               onCancelEdit?.();
             }}
-            className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-semibold"
+            className="w-full bg-transparent border border-gray-500 text-white py-2 px-4 rounded-xl font-semibold hover:bg-white/10 transition"
           >
             Batal
           </button>

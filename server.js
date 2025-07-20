@@ -50,7 +50,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  const imageUrl = `https://ybstudio-production.up.railway.app/uploads/${req.file.filename}`;
+  const imageUrl = `https://server-production-0992.up.railway.app//uploads/${req.file.filename}`;
   res.json({ imageUrl });
 });
 

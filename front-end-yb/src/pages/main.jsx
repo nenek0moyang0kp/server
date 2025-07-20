@@ -104,7 +104,7 @@ const MainPage = () => {
           />
           <div className="max-w-6xl mx-auto">
                 <Swiper
-                  spaceBetween={20}
+                  spaceBetween={4}
                   slidesPerView={1}
                   breakpoints={{
                     768: { slidesPerView: 2 },
