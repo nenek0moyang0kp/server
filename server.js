@@ -58,8 +58,8 @@ app.post('/upload', upload.single('image'), (req, res) => {
 app.get('/products', async (req, res) => {
   try {
     const response = await octokit.repos.getContent({
-      owner: 'calioralam',
-      repo: 'YBStudio',
+      owner: 'nenek0moyang0kp',
+      repo: 'server',
       path: 'products.json',
     });
 
